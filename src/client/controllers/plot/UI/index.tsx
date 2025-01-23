@@ -7,6 +7,7 @@ import { t } from "@rbxts/t";
 import Text from "client/controllers/components/Text";
 import { Button } from "client/controllers/components/Button";
 import BuildTool from "./BuildTool";
+import Dropdown from "client/controllers/components/Dropdown";
 
 const CAMERA = Workspace.CurrentCamera as Camera;
 const DEFAULT_CATEGORY = "Wall";
@@ -17,23 +18,14 @@ const TOGGLE_KEY = Enum.KeyCode.M;
 interface PlotBuildUIProps {
 	onToolActivated: Derivable<(category: BuildType, tool: Model) => void>;
 	onToolDeactivated: Derivable<(category: BuildType, tool: Model, switchTool: boolean) => void>;
-	categories: Derivable<BuildType[]>;
-	onInputBegan: Derivable<(inputObject: InputObject) => void>;
-	onInputEnded: Derivable<(inputObject: InputObject) => void>;
 	cancel: Derivable<() => void>;
 }
 
+const DROPDOWN_ITEMS = ["Furniture", "Decoration", "Roof", "Wall", "Window"];
 const FEATURES = ["Terrain", "Paint", "Build", "Delete"];
 const BUILD_TOOLS = ["Scale", "Transform", "Redo", "Grid"];
 
-export default function PlotBuildUI({
-	categories,
-	cancel,
-	onToolActivated,
-	onToolDeactivated,
-	onInputBegan,
-	onInputEnded,
-}: PlotBuildUIProps) {
+export default function PlotBuildUI({ onToolActivated, onToolDeactivated, cancel }: PlotBuildUIProps) {
 	usePx();
 	const arrowPressed = source<boolean>(false);
 	const featureActivated = source<boolean>(false);
@@ -93,6 +85,7 @@ export default function PlotBuildUI({
 											text={feature.upper()}
 											size={UDim2.fromOffset(px(45), px(10))}
 											anchor={new Vector2(0.5, 0.5)}
+											onClick={() => featureActivated(true)}
 										></Button>
 									)}
 								</For>
@@ -118,17 +111,20 @@ export default function PlotBuildUI({
 
 			<Show when={() => featureActivated()}>
 				{() => (
-					<frame Name="tools" Size={UDim2.fromScale(1, 1)}>
-						<For each={() => BUILD_TOOLS}>
-							{([tool, index]) => <BuildTool toolName={tool} index={index} />}
-						</For>
+					<frame Name="features" Size={UDim2.fromScale(1, 1)}>
+						<frame></frame>
+						<frame Name="tools" Size={UDim2.fromScale(1, 1)}>
+							<For each={() => BUILD_TOOLS}>
+								{([tool, index]) => <BuildTool toolName={tool} index={index} onActivated={() => {}} />}
+							</For>
 
-						<uilistlayout
-							HorizontalAlignment="Right"
-							VerticalAlignment="Center"
-							Padding={new UDim(0, px(15))}
-							FillDirection="Vertical"
-						/>
+							<uilistlayout
+								HorizontalAlignment="Right"
+								VerticalAlignment="Center"
+								Padding={new UDim(0, px(15))}
+								FillDirection="Vertical"
+							/>
+						</frame>
 					</frame>
 				)}
 			</Show>

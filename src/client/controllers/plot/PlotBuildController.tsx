@@ -33,8 +33,6 @@ export class PlotBuildController implements OnStart, OnInit {
 						onToolDeactivated={(category, tool, isSwitch) =>
 							this.createBuildToolForPlayer(category, tool, true, isSwitch)
 						}
-						onInputBegan={() => {}}
-						onInputEnded={() => {}}
 					></PlotUI>
 				</screengui>
 			),
