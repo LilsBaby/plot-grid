@@ -43,7 +43,7 @@ export function DropShadow({
 	};
 	return (
 		<imagelabel
-		Name="shadow"
+			Name="shadow"
 			Image={image}
 			ImageColor3={color}
 			ImageTransparency={transparency}

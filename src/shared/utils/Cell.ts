@@ -8,6 +8,8 @@ export interface CellProperties {
 export default class Cell implements CellProperties {
 	X: number;
 	Z: number;
+	WorldCFrame?: CFrame | undefined;
+	WorldPosition?: Vector3 | undefined;
 
 	constructor({ X, Z }: CellProperties) {
 		this.X = X;

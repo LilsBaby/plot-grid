@@ -18,9 +18,9 @@ export default class Grid {
 		const length = size.X / cellSize;
 		const width = size.Z / cellSize;
 
-		for (let x = 1; x <= length; x++) {
-			this.Grid[x] = [];
-			for (let z = 1; z <= width; z++) {
+		for (const x of $range(1, length)) {
+			this.Grid[x] = []
+			for (const z of $range(1, width)) {
 				this.Grid[x][z] = new Cell({
 					X: x,
 					Z: z,

@@ -1,4 +1,17 @@
-import Vide, { action, Derivable, derive, effect, For, read, show, Show, source, spring } from "@rbxts/vide";
+import Vide, {
+	action,
+	Case,
+	Derivable,
+	derive,
+	effect,
+	For,
+	read,
+	show,
+	Show,
+	source,
+	spring,
+	Switch,
+} from "@rbxts/vide";
 import { BuildTools, BuildType } from "types/enums/build-tools";
 import { UserInputService, Workspace } from "@rbxts/services";
 import { px, usePx } from "client/controllers/utils/use-px";
@@ -6,8 +19,14 @@ import { useEvent } from "client/controllers/utils/use-event";
 import { t } from "@rbxts/t";
 import Text from "client/controllers/components/Text";
 import { Button } from "client/controllers/components/Button";
-import BuildTool from "./BuildTool";
+import BuildTool from "./Card";
 import Dropdown from "client/controllers/components/Dropdown";
+import { DropShadow } from "client/controllers/components/DropShadow";
+import Glow from "client/controllers/components/Glow";
+import Features from "./Features";
+import Overlay from "./Overlay";
+import { ItemSprites } from "types/constants/item-sprites";
+import { Input } from "client/controllers/components/Input";
 
 const CAMERA = Workspace.CurrentCamera as Camera;
 const DEFAULT_CATEGORY = "Wall";
@@ -29,54 +48,103 @@ export default function PlotBuildUI({ onToolActivated, onToolDeactivated, cancel
 	usePx();
 	const arrowPressed = source<boolean>(false);
 	const featureActivated = source<boolean>(false);
+	const arrowRotation = spring(() => (arrowPressed() ? ARROW_DEFAULT_ROTATION : ARROW_PRESSED_ROTATION), 0.2);
 	const absSize = source<Vector2>();
-	const arrowRotation = spring(() => (arrowPressed() ? 90 : 270), 0.2);
-	const containerSize = spring(() =>
-		arrowPressed() ? UDim2.fromOffset(px(350), px(300)) : UDim2.fromOffset(px(350), px(100)),
+	const absPosition = spring(
+		() => (absSize() !== undefined ? UDim2.fromOffset(absSize()!.X, absSize()!.Y) : UDim2.fromOffset(0, 0)),
+		0.2,
+	);
+
+	const featuresShow = show(
+		() => arrowPressed() && !featureActivated(),
+		() => (
+			<Features
+				features={FEATURES}
+				featurePressed={() => {
+					featureActivated(true);
+				}}
+			/>
+		),
+		() => <></>,
+	);
+
+	const overlayShow = show(
+		() => featureActivated(),
+		() => <Overlay dropdown={DROPDOWN_ITEMS} items={ItemSprites.Furniture} />,
+		() => <></>,
 	);
 
 	return (
 		<frame Name="build_ui" BackgroundTransparency={1} Size={UDim2.fromScale(1, 1)}>
-			<frame Name="build" BackgroundTransparency={1} Size={UDim2.fromScale(1, 1)}>
-				<frame
-					Name="container"
-					Size={() => {
-						const size = read(absSize);
-						return UDim2.fromOffset(size?.X, size?.Y);
-					}}
-					ClipsDescendants={true}
-				></frame>
+			<frame Name="first" Size={() => absPosition()} ClipsDescendants={true} AnchorPoint={new Vector2(0, 1)}>
+				<uicorner CornerRadius={new UDim(0, px(50))} />
 
-				<frame
-					Size={containerSize}
-					AutomaticSize={"Y"}
-					BackgroundTransparency={1}
-					action={(container) => {
-						absSize(container.AbsoluteSize);
-						container
-							.GetPropertyChangedSignal("AbsoluteSize")
-							.Connect(() => absSize(container.AbsoluteSize));
-					}}
-				>
-					<frame Size={UDim2.fromOffset(px(150), px(95))} BackgroundTransparency={1}>
-						<Text text="Build" textSize={() => px(25)} size={UDim2.fromOffset(px(50), px(10))} />
-						<Button
-							text=">"
-							size={UDim2.fromOffset(px(55), px(55))}
-							rotation={arrowRotation}
-							onClick={() => arrowPressed(!arrowPressed())}
-						>
-							<uicorner CornerRadius={new UDim(0, px(15))} />
-						</Button>
-						<uilistlayout
-							HorizontalAlignment="Center"
-							VerticalAlignment="Center"
-							Padding={new UDim(0, px(15))}
-							HorizontalFlex="SpaceAround"
-						/>
-					</frame>
+				<Glow size={UDim2.fromScale(1, 1)} transparency={0} />
+				<DropShadow color={Color3.fromRGB(169, 193, 194)} radius={px(35)} offset={px(65)} />
+				<uilistlayout VerticalAlignment="Bottom" HorizontalAlignment="Center" />
+			</frame>
 
-					<frame Size={UDim2.fromOffset(px(150), px(50))}>
+			<frame
+				Name="second"
+				Size={UDim2.fromOffset(px(1750), px(115))}
+				BackgroundTransparency={1}
+				AutomaticSize="Y"
+				AnchorPoint={new Vector2(0, 1)}
+				AbsoluteSizeChanged={(abs) => absSize(abs)}
+			>
+				<frame Size={UDim2.fromOffset(px(2350), px(190))} BackgroundTransparency={1}>
+					<Text
+						text="Build"
+						textSize={() => px(25)}
+						textFont={Enum.Font.ArialBold}
+						textColor={Color3.fromHex("FFB2B2")}
+						size={UDim2.fromOffset(px(50), px(10))}
+					/>
+					<Button
+						text=">"
+						color={Color3.fromHex("FFB2B2")}
+						size={UDim2.fromOffset(px(55), px(55))}
+						rotation={arrowRotation}
+						onClick={() => {
+							featureActivated(false);
+							arrowPressed(!arrowPressed());
+						}}
+					>
+						<Glow size={UDim2.fromScale(1, 1)} color={Color3.fromHex("FFB2B2")} />
+						<uicorner CornerRadius={new UDim(0, px(30))} />
+					</Button>
+
+					<uipadding PaddingLeft={new UDim(0, px(30))} />
+					<uilistlayout
+						HorizontalAlignment="Center"
+						VerticalAlignment="Center"
+						Padding={new UDim(0, px(15))}
+						FillDirection="Horizontal"
+						HorizontalFlex="SpaceAround"
+					/>
+				</frame>
+
+				{featuresShow}
+				{overlayShow}
+
+				<Input
+					inputBegan={(input) => {
+						if (input.KeyCode === TOGGLE_KEY) {
+							featureActivated(false);
+							arrowPressed(!arrowPressed());
+						}
+					}}
+				/>
+
+				<uilistlayout FillDirection="Vertical" HorizontalAlignment="Center" />
+			</frame>
+
+			<uipadding PaddingBottom={new UDim(0, px(25))} PaddingLeft={new UDim(0.3, 0)} PaddingTop={new UDim(1, 0)} />
+		</frame>
+	);
+
+	/**
+	 * <frame Size={UDim2.fromOffset(px(150), px(50))}>
 						<Show when={() => arrowPressed()}>
 							{() => (
 								<For each={() => FEATURES}>
@@ -97,39 +165,7 @@ export default function PlotBuildUI({ onToolActivated, onToolDeactivated, cancel
 							HorizontalFlex="SpaceEvenly"
 						/>
 					</frame>
-
-					<uilistlayout
-						HorizontalAlignment="Center"
-						VerticalAlignment="Center"
-						Padding={new UDim(0, px(15))}
-					/>
-				</frame>
-
-				<uipadding PaddingBottom={new UDim(0, px(15))} />
-				<uilistlayout HorizontalAlignment="Center" VerticalAlignment="Bottom" />
-			</frame>
-
-			<Show when={() => featureActivated()}>
-				{() => (
-					<frame Name="features" Size={UDim2.fromScale(1, 1)}>
-						<frame></frame>
-						<frame Name="tools" Size={UDim2.fromScale(1, 1)}>
-							<For each={() => BUILD_TOOLS}>
-								{([tool, index]) => <BuildTool toolName={tool} index={index} onActivated={() => {}} />}
-							</For>
-
-							<uilistlayout
-								HorizontalAlignment="Right"
-								VerticalAlignment="Center"
-								Padding={new UDim(0, px(15))}
-								FillDirection="Vertical"
-							/>
-						</frame>
-					</frame>
-				)}
-			</Show>
-		</frame>
-	);
+	 */
 
 	/**
 	 * const activated = source(false);

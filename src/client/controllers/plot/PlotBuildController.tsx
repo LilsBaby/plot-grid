@@ -27,7 +27,6 @@ export class PlotBuildController implements OnStart, OnInit {
 			() => (
 				<screengui>
 					<PlotUI
-						categories={["Wall", "Furniture", "Stairs"]}
 						cancel={() => {}}
 						onToolActivated={(category, tool) => this.createBuildToolForPlayer(category, tool, false)}
 						onToolDeactivated={(category, tool, isSwitch) =>

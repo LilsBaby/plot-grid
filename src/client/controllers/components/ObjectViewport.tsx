@@ -6,10 +6,8 @@ import { cframe } from "@rbxutil/quaternion";
 import { useEvent } from "../utils/use-event";
 import { RunService } from "@rbxts/services";
 
-type RotationSchemeRecord = { LerpSpeed: number; Angle: CFrame };
-
 export interface ObjectViewportProps {
-	readonly Object: Model;
+	readonly Object: Derivable<Model>;
 	readonly Depth: number;
 	readonly Rotation?: Derivable<CFrame>;
 	readonly Transparency?: Derivable<number>;
@@ -29,21 +27,29 @@ function setDefaultCameraView(camera: Camera, model: Model, cameraDepth = 0): vo
 
 /**
  *
- * @param param0
+ * @param Object
+ * @param Depth
+ * @param Rotation
+ * @param Transparency 
  * @returns
  */
 export default function ObjectViewport({ Object, Depth, Rotation, Transparency = 0, children }: ObjectViewportProps) {
 	Rotation ??= new CFrame();
-	const model = !t.nil(Object) ? Object.Clone() : Make("Model", {});
+	const model = () => (!t.nil(read(Object)) ? read(Object).Clone() : Make("Model", {}));
 	const viewportCamera = Make("Camera", {});
-	setDefaultCameraView(viewportCamera, model, Depth);
+	setDefaultCameraView(viewportCamera, model(), Depth);
 
 	effect(() => {
-		model.PivotTo(model.GetPivot().mul(read(Rotation)));
+		model().PivotTo(model().GetPivot().mul(read(Rotation)));
 	});
 
 	return (
-		<viewportframe CurrentCamera={viewportCamera} Size={UDim2.fromScale(1, 1)} ImageTransparency={Transparency}>
+		<viewportframe
+			BackgroundTransparency={1}
+			CurrentCamera={viewportCamera}
+			Size={UDim2.fromScale(1, 1)}
+			ImageTransparency={Transparency}
+		>
 			{viewportCamera}
 			{model}
 			{children}

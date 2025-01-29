@@ -4,24 +4,28 @@ import { BuildType } from "types/enums/build-tools";
 
 export const DEFAULT_CATEGORY: BuildType = "Wall";
 
+interface BuildState {
+	currentSelectedCategory?: string
+}
+
 export interface Plot {
 	readonly id?: string;
 	readonly owner?: string;
 
 	/** Client states */
-	category: BuildType;
-	categoryIndex: number;
+	BuildState: BuildState
+	currentItemIndex: number;
 }
 
 const PlotTemplate: Plot = {
 	id: "",
 	owner: "",
-	category: "Wall",
-	categoryIndex: 0,
+	BuildState: {  },
+	currentItemIndex: 3,
 };
 
 type PlayerPlots = {
-	readonly [K in string]?: Plot;
+	readonly [K in string]?: Plot | undefined;
 };
 
 export const plot = {
@@ -32,16 +36,19 @@ export function getPlotForPlayer(player: string) {
 	return plot.players()[player];
 }
 
-export function setPlotForPlayer(player: string, plotData: Plot) {
+export function setPlotForPlayer(player: string, plotData: Plot | undefined) {
 	plot.players((state) => ({
 		...state,
-		[player]: {
+		[player]: plotData ? {
 			...PlotTemplate,
 			...plotData,
 			owner: player,
-		},
+			
+		} : undefined
 	}));
 }
+
+
 
 export function updatePlayerData(player: string, updater: (data: Plot) => Plot) {
 	plot.players((state) => ({

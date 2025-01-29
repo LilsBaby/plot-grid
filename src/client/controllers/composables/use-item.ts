@@ -3,16 +3,18 @@ import { t } from "@rbxts/t";
 import { useAtom } from "@rbxts/vide-charm";
 import { DEFAULT_CATEGORY, getPlotForPlayer } from "shared/store/plot";
 
-export function useCategory() {
+export function useItemCategory() {
 	return useAtom(() => {
 		const plot = getPlotForPlayer(Players.LocalPlayer.Name);
-		return plot !== undefined && plot.category ? plot.category : DEFAULT_CATEGORY;
+		return plot !== undefined && plot.BuildState.currentSelectedCategory
+			? plot.BuildState.currentSelectedCategory
+			: undefined;
 	});
 }
 
-export function useCategoryIndex() {
+export function useItemIndex() {
 	return useAtom(() => {
 		const plot = getPlotForPlayer(Players.LocalPlayer.Name);
-		return plot !== undefined && plot.categoryIndex ? plot.categoryIndex : 0;
+		return plot !== undefined && plot.currentItemIndex ? plot.currentItemIndex : 0;
 	});
 }

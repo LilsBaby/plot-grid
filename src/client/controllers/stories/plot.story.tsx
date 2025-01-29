@@ -7,12 +7,9 @@ export = (target: Instance) => {
 	return mount(() => {
 		return (
 			<PlotBuildUI
-		categories={["Wall", "Furniture", "Stairs"]}
 		cancel={() => {}}
 		onToolActivated={(category, tool) => {}}
 		onToolDeactivated={(category, tool, isSwitch) => {}}
-		onInputBegan={() => {}}
-		onInputEnded={() => {}}
 	></PlotBuildUI>
 		);
 	}, target);
